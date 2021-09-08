@@ -26,7 +26,7 @@ header = {
         'Host': 'overseas.szlcsc.com',
         'referer': 'https://so.szlcsc.com/',        # 重要参数
         "sec-ch-ua": '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
-        'cookie': 'cpx=1; Qs_lvt_290854=1630986062; Qs_pv_290854=1617424368694690300; acw_tc=6f06b41816309860598416291e7f1873e1fa583a980bdfc7e4d2cc3607',  # 重要参数，修改成自己的
+        'cookie': 'noLoginCustomerFlag=d5665e6bf5cd822093e8; noLoginCustomerFlag2=e73fcf102a3e34e1ed42; computerKey=86a49fb567799e0f40a1; cpx=1; Qs_lvt_290854=1630986062,1631064845; Hm_lvt_e2986f4b6753d376004696a1628713d2=1630986084,1631064846; Qs_pv_290854=1617424368694690300,552258205458888770,1532297414700457700; acw_tc=6f06b41f16310648464686499e247f81ff3abfd6697f8fb8ca8baba887; Hm_lpvt_e2986f4b6753d376004696a1628713d2=1631064850',  # 重要参数，修改成自己的
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'  # 重要常见参数
     }
 
@@ -43,6 +43,13 @@ def fetch_product_data(provider, pageNum):
     result = re.findall(p, response.text)[0]
     # 将结果转为json对象
     js = json.loads(result)
+    if len(js.get("result")) == 0:
+        print("ERROR WHILE FETCH PAGE NUM %d" % pageNum)
+        print("READY TO RESET PAGE %d AND SLEEP FOR A WHILE" % pageNum)
+        sleep_sec = random.randint(5, 16) * 100 + random.randint(0, 100)
+        print("SLEEP SEC %d" % sleep_sec)
+        time.sleep(sleep_sec)
+        return fetch_product_data(provider, pageNum)
     # 包装返回结果
     return {"result": js.get('result')[0].get('products'),
             "pageNumber": js.get('result')[0].get('pageNumber'),
@@ -109,7 +116,7 @@ def get_rand_page():
 
 if __name__ == '__main__':
     provider = "mouser"
-    page = 646
+    page = 1000
     # 拉取一次数据
     data = fetch_product_data(provider, page)
     totalPage = data.get("pageTotal")
@@ -148,7 +155,9 @@ if __name__ == '__main__':
             print("ERROR WHILE RESOLVE PAGE NUM %d" % page)
             page = page - 1
             print("READY TO RESET PAGE %d AND SLEEP FOR A WHILE" % page)
-            time.sleep(random.randint(8, 16) * 100)
+            sleep_sec = random.randint(5, 12) * 100 + random.randint(0, 100)
+            print("SLEEP SEC %d" % sleep_sec)
+            time.sleep(sleep_sec)
             data = {"pageNumber": page, "pageTotal": totalPage}
 
         print("--------------------------- CURRENT PAGE [" + str(page) + "] END ----------------------------")
